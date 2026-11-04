@@ -1,21 +1,27 @@
-# MamaGate: from danger sign to confirmed arrival, with a Strands agent on Amazon Bedrock AgentCore
+# MamaGate: A Maternal Referral Agent for Nigeria's Frontline Health Workers
 
 *A rules gate and referral relay for community health workers in Nigerian
 primary health care. Health focus area.*
 
-**Demo video:** [youtu.be/mhFnBA8rcGI](https://youtu.be/mhFnBA8rcGI) · **Code:** [github.com/ogasege/mamagate](https://github.com/ogasege/mamagate)
+**Code:** [github.com/ogasege/mamagate](https://github.com/ogasege/mamagate)
 
 > Synthetic demo data. Decision support for trained health workers. Not a
 > medical device. The rules have not been reviewed by a clinician.
 
+[![MamaGate demo video](https://img.youtube.com/vi/mhFnBA8rcGI/maxresdefault.jpg)](https://youtu.be/mhFnBA8rcGI)
+
 ## The problem
 
-In Nigeria, fewer than half of births have a skilled attendant: 46%
-nationally, and just 10% in Kebbi State, the lowest of any state, against
-87% in Lagos. The need is greatest in the rural North ([Nigeria Demographic and Health Survey
-2023-24](https://dhsprogram.com/publications/publication-SR294-Summary-Reports-Key-Findings.cfm)). In many rural primary health care centres the person in front of a
-pregnant woman is a community health extension worker (CHEW), often alone
-and with no doctor on site.
+Nigeria has about **7.5 million births a year**, and about **75,000 women
+die** from pregnancy and childbirth every year, roughly 29% of all maternal
+deaths worldwide ([WHO, Trends in maternal mortality 2000–2023](https://www.who.int/publications/i/item/9789240108462)).
+Fewer than half of births have a skilled attendant: **46% nationally**, which
+leaves about **4 million births a year** without one. In Kebbi State, the
+lowest of any state, the figure is just **10%**, against 87% in Lagos. The
+need is greatest in the rural North ([Nigeria Demographic and Health Survey 2023-24](https://dhsprogram.com/publications/publication-SR294-Summary-Reports-Key-Findings.cfm)).
+In many rural primary health care centres the person in front of a pregnant
+woman is a community health extension worker (CHEW), often alone and with no
+doctor on site.
 
 When a danger sign appears, three delays decide what happens next: deciding
 to seek care, reaching care, and receiving care. Nigeria's evidence points
@@ -191,6 +197,7 @@ S3.
 ## Sources
 
 - [Nigeria Demographic and Health Survey 2023-24, Summary Report](https://dhsprogram.com/publications/publication-SR294-Summary-Reports-Key-Findings.cfm). National Population Commission and ICF, The DHS Program.
+- WHO, UNICEF, UNFPA, World Bank Group and UNDESA. [Trends in maternal mortality 2000 to 2023](https://www.who.int/publications/i/item/9789240108462), 2025.
 - Ishaku S, Ahonsi B, Tukur J, Oginni A. [Attrition from care after the critical phase of severe pre-eclampsia and eclampsia](https://doi.org/10.4236/health.2013.59199). *Health* 5(9): 1461-1466, 2013.
 - [National Standing Orders for CHEWs and JCHEWs, 2024 edition](https://chprbn.gov.ng/standingorders/). Community Health Practitioners Registration Board of Nigeria.
 - WHO. [*Pregnancy, Childbirth, Postpartum and Newborn Care: A guide for essential practice*, 3rd edition](https://iris.who.int/handle/10665/249580), 2015.
