@@ -35,9 +35,6 @@ coordinates the handoff, and the loop ends at a confirmed arrival.*
 
 ![MamaGate referral loop](docs/diagrams/referral-loop.png)
 
-Every requirement and criterion, with the reason for each choice, is in
-[docs/submission-checklist.md](docs/submission-checklist.md).
-
 ## What it does
 
 | Step | Who owns it | AWS / Strands |
@@ -153,7 +150,7 @@ evals/             vignettes, offline eval, real-readings check
 tests/             unit tests
 data/external/     UCI Maternal Health Risk dataset (CC BY 4.0)
 MamaGateDeploy/    agentcore CLI project (CDK)
-docs/              research notes, design prompts, video script
+docs/diagrams/     architecture diagrams used in this README
 ```
 
 ## Sources and licences
