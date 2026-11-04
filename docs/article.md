@@ -3,7 +3,7 @@
 *A rules gate and referral relay for community health workers in Nigerian
 primary health care. Health focus area.*
 
-**Demo video:** [VIDEO LINK] · **Code:** https://github.com/ogasege/mamagate
+**Demo video:** [VIDEO LINK] · **Code:** [github.com/ogasege/mamagate](https://github.com/ogasege/mamagate)
 
 > Synthetic demo data. Decision support for trained health workers. Not a
 > medical device. The rules have not been reviewed by a clinician.
@@ -175,7 +175,8 @@ measure fidelity to the rules, not clinical accuracy.
 
 The rules are not clinically reviewed; the receiving hospitals are
 synthetic; no health worker or patient has used MamaGate; clinical output is
-English only; and its effect on referral completion is unknown until a pilot
+English, and the family-card translations are drafts awaiting native clinical
+review; and its effect on referral completion is unknown until a pilot
 measures it.
 
 ## Try it
@@ -192,21 +193,12 @@ S3.
 
 ## Sources
 
-- Nigeria Demographic and Health Survey 2023-24, Summary Report. National
-  Population Commission and ICF, The DHS Program. https://dhsprogram.com/publications/publication-SR294-Summary-Reports-Key-Findings.cfm
-- Ishaku S, Ahonsi B, Tukur J, Oginni A. Attrition from care after the
-  critical phase of severe pre-eclampsia and eclampsia. *Health* 5(9):
-  1461-1466, 2013. https://doi.org/10.4236/health.2013.59199
-- National Standing Orders for Community Health Extension Workers and Junior
-  CHEWs, 2024 edition. Community Health Practitioners Registration Board of
-  Nigeria. https://chprbn.gov.ng/standingorders/
-- WHO. *Pregnancy, Childbirth, Postpartum and Newborn Care: A guide for
-  essential practice*, 3rd edition, 2015. https://iris.who.int/handle/10665/249580
-- WHO. *Digital adaptation kit for antenatal care*, 2021. https://www.who.int/publications/i/item/9789240020306
-- WHO. *Diagnostic criteria and classification of hyperglycaemia first
-  detected in pregnancy*, 2013. https://www.who.int/publications/i/item/WHO-NMH-MND-13.2
-- Ahmed M, Kashem MA. *Maternal Health Risk*. UCI Machine Learning
-  Repository, 2020 (CC BY 4.0). https://archive.ics.uci.edu/dataset/863/maternal+health+risk
-- Strands Agents SDK documentation. https://strandsagents.com
-- Amazon Bedrock AgentCore documentation.
-  https://docs.aws.amazon.com/bedrock-agentcore/
+- [Nigeria Demographic and Health Survey 2023-24, Summary Report](https://dhsprogram.com/publications/publication-SR294-Summary-Reports-Key-Findings.cfm). National Population Commission and ICF, The DHS Program.
+- Ishaku S, Ahonsi B, Tukur J, Oginni A. [Attrition from care after the critical phase of severe pre-eclampsia and eclampsia](https://doi.org/10.4236/health.2013.59199). *Health* 5(9): 1461-1466, 2013.
+- [National Standing Orders for CHEWs and JCHEWs, 2024 edition](https://chprbn.gov.ng/standingorders/). Community Health Practitioners Registration Board of Nigeria.
+- WHO. [*Pregnancy, Childbirth, Postpartum and Newborn Care: A guide for essential practice*, 3rd edition](https://iris.who.int/handle/10665/249580), 2015.
+- WHO. [*Digital adaptation kit for antenatal care*](https://www.who.int/publications/i/item/9789240020306), 2021.
+- WHO. [*Diagnostic criteria and classification of hyperglycaemia first detected in pregnancy*](https://www.who.int/publications/i/item/WHO-NMH-MND-13.2), 2013.
+- Ahmed M, Kashem MA. [*Maternal Health Risk*](https://archive.ics.uci.edu/dataset/863/maternal+health+risk). UCI Machine Learning Repository, 2020 (CC BY 4.0).
+- [Strands Agents SDK documentation](https://strandsagents.com).
+- [Amazon Bedrock AgentCore documentation](https://docs.aws.amazon.com/bedrock-agentcore/).
