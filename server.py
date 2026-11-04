@@ -11,6 +11,7 @@ Run with ``uv run uvicorn server:app --port 8899``.
 
 from __future__ import annotations
 
+import hmac
 import json
 import os
 import uuid
@@ -90,7 +91,7 @@ def require_key(x_api_key: str | None = Header(default=None)) -> None:
     identities (for example Amazon Cognito) instead.
     """
     expected = os.environ.get("MAMAGATE_API_KEY")
-    if expected and x_api_key != expected:
+    if expected and not hmac.compare_digest(x_api_key or "", expected):
         raise HTTPException(401, "Missing or invalid API key")
 
 

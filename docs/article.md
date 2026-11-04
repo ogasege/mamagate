@@ -11,15 +11,16 @@ primary health care. Health focus area.*
 ## The problem
 
 In Nigeria, fewer than half of births have a skilled attendant: 46%
-nationally and 10% in Kebbi State (Nigeria Demographic and Health Survey
-2023-24). In many rural primary health care centres the person in front of a
+nationally, and just 10% in Kebbi State, the lowest of any state, against
+87% in Lagos. The need is greatest in the rural North ([Nigeria Demographic and Health Survey
+2023-24](https://dhsprogram.com/publications/publication-SR294-Summary-Reports-Key-Findings.cfm)). In many rural primary health care centres the person in front of a
 pregnant woman is a community health extension worker (CHEW), often alone
 and with no doctor on site.
 
 When a danger sign appears, three delays decide what happens next: deciding
 to seek care, reaching care, and receiving care. Nigeria's evidence points
 at the handover. In a Population Council study at Kano primary health care
-centres (Ishaku et al., *Health*, 2013; fieldwork 2010-11), only one in ten
+centres ([Ishaku et al., *Health*, 2013](https://doi.org/10.4236/health.2013.59199); fieldwork 2010-11), only one in ten
 women given pre-referral treatment for severe pre-eclampsia went on to
 complete the referral, against 44% of controls. Treatment felt like care,
 and the journey to hospital did not happen.
@@ -33,9 +34,9 @@ the woman.
    bleeding, symptoms. Anything not measured is left empty, and empty is
    never treated as normal.
 2. **A rules gate decides urgency, in code, before any AI runs.** Thirty-five
-   danger-sign rules transcribed from Nigeria's 2024 National Standing Orders
-   for CHEWs and WHO's *Pregnancy, Childbirth, Postpartum and Newborn Care*
-   charts return REFER NOW, WITHIN 24H or ROUTINE in about a millisecond,
+   danger-sign rules transcribed from Nigeria's 2024 [National Standing Orders
+   for CHEWs](https://chprbn.gov.ng/standingorders/) and WHO's [*Pregnancy, Childbirth, Postpartum and Newborn
+   Care*](https://iris.who.int/handle/10665/249580) charts return REFER NOW, WITHIN 24H or ROUTINE in about a millisecond,
    with the source page for every rule that fired.
 3. **A Strands agent on Amazon Bedrock AgentCore completes the referral.**
    It chooses the receiving hospital with a real road time from Amazon
@@ -44,7 +45,9 @@ the woman.
    check with Amazon EventBridge Scheduler.
 4. **The family gets a plain-language card:** where to go, how long it
    takes, what to bring (money, a companion, a blood donor), and which signs
-   mean go at once. Fixed wording, no diagnosis, no doses.
+   mean go at once, in English, Pidgin, Hausa, Yoruba and Igbo. Fixed
+   wording, no diagnosis, no doses; translations are drafts awaiting native
+   clinical review.
 5. **The hospital closes the loop.** The receiving ward sees the referral
    before she arrives. One tap marks her arrived, which deletes the pending
    supervisor alert and tells the clinic. If she never arrives, the
@@ -52,7 +55,7 @@ the woman.
 
 Who is it for? Not a patient self-triage app, on purpose: the gate needs
 measurements a woman cannot take at home, a missed alarm at home is exactly
-the delay that kills, and only 30% of Nigerian women own a smartphone.
+the delay that kills, and only [30% of Nigerian women own a smartphone](https://dhsprogram.com/publications/publication-SR294-Summary-Reports-Key-Findings.cfm).
 Patient chatbots already exist; the referral handover between two
 facilities is the gap.
 
@@ -147,12 +150,12 @@ measure fidelity to the rules, not clinical accuracy.
 ## What I learned
 
 1. **Real data found a gap that synthetic cases did not.** I ran the gate
-   over 452 unique antenatal readings from the UCI Maternal Health Risk
-   dataset. It referred only 38 of 112 "high risk" readings. Most of the rest
+   over 452 unique antenatal readings from the [UCI Maternal Health Risk
+   dataset](https://archive.ics.uci.edu/dataset/863/maternal+health+risk). It referred only 38 of 112 "high risk" readings. Most of the rest
    had BP of 140/90 or more with no protein test recorded, or high blood
    sugar. My first fix made both a 24-hour referral; that was stricter than
-   WHO and nearly doubled low-risk flags. Following the WHO antenatal care
-   decision logic instead, they became follow-up actions (test urine protein
+   WHO and nearly doubled low-risk flags. Following the [WHO antenatal care
+   decision logic](https://www.who.int/publications/i/item/9789240020306) instead, they became follow-up actions (test urine protein
    now; arrange a diabetes assessment) that never change urgency. Now 98 of
    112 get a referral or an action, and emergency referrals stay at 9%.
 2. **A measured volume is not a dose.** My first note checker rejected
@@ -186,3 +189,24 @@ uv run uvicorn server:app --port 8899   # then open http://localhost:8899
 Built with the Strands Agents SDK, Amazon Bedrock AgentCore, Amazon Bedrock,
 Amazon Location Service, Amazon SNS, Amazon EventBridge Scheduler and Amazon
 S3.
+
+## Sources
+
+- Nigeria Demographic and Health Survey 2023-24, Summary Report. National
+  Population Commission and ICF, The DHS Program. https://dhsprogram.com/publications/publication-SR294-Summary-Reports-Key-Findings.cfm
+- Ishaku S, Ahonsi B, Tukur J, Oginni A. Attrition from care after the
+  critical phase of severe pre-eclampsia and eclampsia. *Health* 5(9):
+  1461-1466, 2013. https://doi.org/10.4236/health.2013.59199
+- National Standing Orders for Community Health Extension Workers and Junior
+  CHEWs, 2024 edition. Community Health Practitioners Registration Board of
+  Nigeria. https://chprbn.gov.ng/standingorders/
+- WHO. *Pregnancy, Childbirth, Postpartum and Newborn Care: A guide for
+  essential practice*, 3rd edition, 2015. https://iris.who.int/handle/10665/249580
+- WHO. *Digital adaptation kit for antenatal care*, 2021. https://www.who.int/publications/i/item/9789240020306
+- WHO. *Diagnostic criteria and classification of hyperglycaemia first
+  detected in pregnancy*, 2013. https://www.who.int/publications/i/item/WHO-NMH-MND-13.2
+- Ahmed M, Kashem MA. *Maternal Health Risk*. UCI Machine Learning
+  Repository, 2020 (CC BY 4.0). https://archive.ics.uci.edu/dataset/863/maternal+health+risk
+- Strands Agents SDK documentation. https://strandsagents.com
+- Amazon Bedrock AgentCore documentation.
+  https://docs.aws.amazon.com/bedrock-agentcore/
