@@ -1,0 +1,332 @@
+# MamaGate danger-sign rules, draft 0.2, NOT clinically reviewed.
+# Thresholds are paraphrased facts with page references. No source tables
+# or dose text are reproduced here.
+#
+# Evaluation contract (enforced in mamagate/triage.py):
+#   * a missing number is NaN, so any comparison with it is false;
+#   * a missing flag is false;
+#   * the gate reports which core inputs were missing and never reads
+#     "no rule fired" as safe.
+#
+# Page references:
+#   SO-CHEW  = National Standing Orders for CHEWs, CHPRBN/NPHCDA, 2024.
+#   SO-JCHEW = National Standing Orders for JCHEWs, 2024.
+#   WHO      = WHO PCPNC 3rd ed. 2015 chart code.
+#   WHO-ZM   = Zambia 2016 national adaptation of PCPNC, PDF page.
+#
+# status values:
+#   so_verified        read directly in the Standing Orders PDF
+#   who_zm_verified    read directly in the Zambia adaptation
+#   who_ncbi_reported  reported from the NCBI copy, not re-read
+#   derived            a stated limit in the source turned into a rule
+#   design_failsafe    builder's cautious choice, not a source rule
+version: 0.2-unreviewed
+disclaimer: >-
+  Transcribed from cited guidelines by a software engineer. Not reviewed by
+  a clinician. Synthetic demo only. Decision support for trained workers.
+
+urgency_levels:
+  REFER_NOW: Maps to "refer immediately" (SO) and "refer urgently" (WHO).
+  WITHIN_24H: Builder's category. The Standing Orders have no 24 h category.
+  ROUTINE: No listed danger sign found. Never shown as "safe".
+
+core_inputs: [sbp, dbp, pulse, temp_c, resp_rate]
+
+fields:
+  numeric: [ga_weeks, sbp, dbp, pulse, resp_rate, temp_c, hb_g_dl, pcv_pct,
+            urine_protein_plus, blood_loss_ml, pad_soaked_minutes,
+            labour_hours, second_stage_hours, third_stage_minutes, fhr,
+            weight_gain_kg_week, hours_since_delivery,
+            blood_sugar_mmol]
+  flags: [pregnant, in_labour, postpartum, convulsion_or_unconscious,
+          very_difficult_breathing, central_cyanosis, difficulty_breathing,
+          vaginal_bleeding, constant_trickle, delivered_outside,
+          placenta_retained, third_degree_tear, severe_abdominal_pain,
+          very_fast_breathing, stiff_neck, lethargy, unable_to_stand,
+          severe_headache, visual_disturbance, epigastric_pain, vomiting,
+          severe_vomiting, pitting_oedema, severe_pallor,
+          weakness_dizziness_or_breathless_at_rest,
+          leaking_fluid_not_in_labour, malpresentation, cord_prolapse,
+          no_fetal_movement, smelly_or_unclear_liquor,
+          fatigue_with_cardiac_or_anaemia_sign, dbp_two_readings_ge_90]
+
+rules:
+  - id: R01_CONVULSION_UNCONSCIOUS
+    label: Convulsing now or recently, or unconscious
+    when: "convulsion_or_unconscious"
+    urgency: REFER_NOW
+    status: so_verified
+    sources: ["SO-CHEW p311 IV, p320 VII, p322 I", "SO-JCHEW p310, p319, p321", "WHO B6"]
+    scope_ref: "SO-CHEW p311, p320, p322"
+  - id: R02_AIRWAY
+    label: Very difficult breathing or central cyanosis
+    when: "very_difficult_breathing or central_cyanosis"
+    urgency: REFER_NOW
+    status: who_ncbi_reported
+    sources: ["WHO B3"]
+  - id: R03_SHOCK
+    label: Signs of shock (systolic BP below 90 or pulse above 110)
+    when: "sbp < 90 or pulse > 110"
+    urgency: REFER_NOW
+    status: who_zm_verified
+    sources: ["WHO B3", "WHO-ZM p23"]
+  - id: R04_BREATHING_FAST
+    label: Difficulty breathing with respiratory rate above 30
+    when: "difficulty_breathing and resp_rate > 30"
+    urgency: REFER_NOW
+    status: so_verified
+    sources: ["SO-CHEW p311 I", "SO-JCHEW p310"]
+  - id: R05_EARLY_BLEED_SEVERE
+    label: Bleeding before 20 weeks, over 12 weeks or with shock or heavy loss
+    when: "vaginal_bleeding and ga_weeks < 20 and (ga_weeks > 12 or sbp < 90 or pulse > 110 or pad_soaked_minutes < 5)"
+    urgency: REFER_NOW
+    status: so_verified
+    sources: ["SO-CHEW p311 II", "SO-JCHEW p310", "WHO B4", "WHO-ZM p24"]
+    scope_ref: "SO-CHEW p311"
+  - id: R06_EARLY_BLEED_OTHER
+    label: Bleeding at 12 weeks or less without shock
+    when: "vaginal_bleeding and ga_weeks <= 12"
+    urgency: WITHIN_24H
+    status: design_failsafe
+    note: "SO gives graded PHC care with review in 3 days; 24 h is stricter."
+    sources: ["SO-CHEW p311 II"]
+  - id: R07_LATE_PREGNANCY_BLEED
+    label: Any vaginal bleeding from 20 weeks of pregnancy
+    when: "pregnant and vaginal_bleeding and ga_weeks >= 20"
+    urgency: REFER_NOW
+    status: so_verified
+    warning: "Do not do a vaginal examination (SO-CHEW p311 III)."
+    sources: ["SO-CHEW p311 III", "SO-JCHEW p310", "WHO B4"]
+    scope_ref: "SO-CHEW p311"
+  - id: R08_LABOUR_BLEED
+    label: Bleeding of more than 100 ml since labour began
+    when: "in_labour and blood_loss_ml > 100"
+    urgency: REFER_NOW
+    status: who_ncbi_reported
+    sources: ["WHO B4"]
+  - id: R09_PPH
+    label: Postpartum haemorrhage (over 250 ml, pad soaked fast, trickle, or delivered outside)
+    when: "postpartum and vaginal_bleeding and (blood_loss_ml > 250 or pad_soaked_minutes < 5 or constant_trickle or delivered_outside)"
+    urgency: REFER_NOW
+    status: who_zm_verified
+    note: "SO uses over 500 ml or shock; WHO over 250 ml. Lower number used."
+    sources: ["SO-CHEW p320 VIII", "SO-JCHEW p319", "WHO B5", "WHO-ZM p25"]
+    scope_ref: "SO-CHEW p320"
+  - id: R10_RETAINED_PLACENTA
+    label: Placenta retained or third stage over 30 minutes
+    when: "placenta_retained or third_stage_minutes > 30"
+    urgency: REFER_NOW
+    status: so_verified
+    sources: ["SO-CHEW p316, p321 XI", "SO-JCHEW p320", "WHO B5"]
+    scope_ref: "SO-CHEW p321"
+  - id: R11_THIRD_DEGREE_TEAR
+    label: Tear involving the anus or rectum
+    when: "third_degree_tear"
+    urgency: REFER_NOW
+    status: so_verified
+    warning: "Do not attempt repair (SO-CHEW p321 X)."
+    sources: ["SO-CHEW p321 X", "WHO B5"]
+    scope_ref: "SO-CHEW p321"
+  - id: R12_SEVERE_PE_SYMPTOMS
+    label: Severe pre-eclampsia symptoms with severe BP or 3+ protein after 20 weeks
+    when: "ga_weeks > 20 and (severe_headache or visual_disturbance or epigastric_pain or vomiting) and (sbp >= 160 or dbp >= 110 or urine_protein_plus >= 3)"
+    urgency: REFER_NOW
+    status: so_verified
+    sources: ["SO-CHEW p311, p312 V", "SO-JCHEW p311"]
+    scope_ref: "SO-CHEW p312"
+  - id: R13_WHO_SEVERE_PE
+    label: Severe pre-eclampsia by WHO criteria
+    when: "(dbp >= 110 and urine_protein_plus >= 3) or (dbp_two_readings_ge_90 and urine_protein_plus >= 2 and (severe_headache or visual_disturbance or epigastric_pain))"
+    urgency: REFER_NOW
+    status: who_zm_verified
+    sources: ["WHO-ZM p45 (chart C3 in that copy)"]
+  - id: R14_BP_SEVERE_ALONE
+    label: Severe blood pressure (160 systolic or 110 diastolic) on its own
+    when: "sbp >= 160 or dbp >= 110"
+    urgency: REFER_NOW
+    status: design_failsafe
+    note: "No guideline states BP alone as a referral rule. Over-referral is reported."
+    sources: ["SO-CHEW p311, p312 (thresholds)"]
+  - id: R15_TOXAEMIA_TWO_SIGNS
+    label: Two of rapid weight gain, proteinuria and pitting oedema
+    when: "pregnant and ((weight_gain_kg_week >= 1) + (urine_protein_plus >= 1) + pitting_oedema) >= 2"
+    urgency: REFER_NOW
+    status: so_verified
+    sources: ["SO-CHEW p312 VI", "SO-JCHEW p311"]
+    scope_ref: "SO-CHEW p312"
+  - id: R16_POSTPARTUM_PE
+    label: Postpartum severe headache with raised BP and proteinuria
+    when: "postpartum and severe_headache and (sbp >= 140 or dbp >= 90) and urine_protein_plus >= 1"
+    urgency: REFER_NOW
+    status: so_verified
+    sources: ["SO-CHEW p322 I", "SO-JCHEW p321"]
+    scope_ref: "SO-CHEW p322"
+  - id: R17_PRE_ECLAMPSIA
+    label: Pre-eclampsia (diastolic 90+ twice with 2+ protein)
+    when: "pregnant and dbp_two_readings_ge_90 and urine_protein_plus >= 2"
+    urgency: WITHIN_24H
+    status: who_zm_verified
+    note: "WHO says refer; SO p312 VIII treat and advise. Clinician question."
+    sources: ["WHO-ZM p45", "SO-CHEW p312 VIII"]
+  - id: R18_SEVERE_ANAEMIA
+    label: Severe anaemia (Hb below 7, or symptoms with pallor or low PCV)
+    when: "hb_g_dl < 7 or (weakness_dizziness_or_breathless_at_rest and (severe_pallor or pcv_pct < 30))"
+    urgency: REFER_NOW
+    status: so_verified
+    sources: ["SO-CHEW p311 I, p313 XIII", "SO-JCHEW p312", "WHO-ZM p46"]
+    scope_ref: "SO-CHEW p313"
+  - id: R19_PROM
+    label: Leaking fluid, not in labour
+    when: "leaking_fluid_not_in_labour"
+    urgency: REFER_NOW
+    status: so_verified
+    sources: ["SO-CHEW p313 XIV", "SO-JCHEW p312", "WHO-ZM p49"]
+    scope_ref: "SO-CHEW p313"
+  - id: R20_MALPRESENTATION
+    label: Malpresentation in labour
+    when: "in_labour and malpresentation"
+    urgency: REFER_NOW
+    status: so_verified
+    sources: ["SO-CHEW p319 I", "SO-JCHEW p318"]
+    scope_ref: "SO-CHEW p319"
+  - id: R21_PROLONGED_LABOUR
+    label: Labour longer than 12 hours
+    when: "in_labour and labour_hours > 12"
+    urgency: REFER_NOW
+    status: so_verified
+    sources: ["SO-CHEW p316, p319 II", "SO-JCHEW p318"]
+    scope_ref: "SO-CHEW p319"
+  - id: R22_SECOND_STAGE
+    label: Second stage longer than 1 hour
+    when: "in_labour and second_stage_hours > 1"
+    urgency: REFER_NOW
+    status: derived
+    sources: ["SO-CHEW p316"]
+  - id: R23_CORD_PROLAPSE
+    label: Cord prolapse in labour
+    when: "in_labour and cord_prolapse"
+    urgency: REFER_NOW
+    status: so_verified
+    sources: ["SO-CHEW p319 III, IV", "SO-JCHEW p318"]
+    scope_ref: "SO-CHEW p319"
+  - id: R24_PRETERM_LABOUR
+    label: Labour before 37 weeks
+    when: "in_labour and ga_weeks < 37"
+    urgency: REFER_NOW
+    status: so_verified
+    sources: ["SO-CHEW p319 V", "SO-JCHEW p318"]
+    scope_ref: "SO-CHEW p319"
+  - id: R25_FETAL_DISTRESS
+    label: Fetal distress in labour (no movement, bad liquor, FHR outside 120-160)
+    when: "in_labour and (no_fetal_movement or smelly_or_unclear_liquor or fhr < 120 or fhr > 160)"
+    urgency: REFER_NOW
+    status: so_verified
+    sources: ["SO-CHEW p319 VI", "SO-JCHEW p318", "WHO-ZM p67"]
+    scope_ref: "SO-CHEW p319"
+  - id: R26_NO_FETAL_MOVEMENT_ANTENATAL
+    label: No fetal movement, not in labour
+    when: "pregnant and not in_labour and no_fetal_movement"
+    urgency: WITHIN_24H
+    status: who_zm_verified
+    sources: ["WHO-ZM p49 (chart C7 in that copy)"]
+  - id: R27_SEVERE_ABDOMINAL_PAIN
+    label: Severe abdominal pain (not normal labour)
+    when: "severe_abdominal_pain"
+    urgency: REFER_NOW
+    status: who_ncbi_reported
+    sources: ["WHO B6"]
+  - id: R28_DANGEROUS_FEVER
+    label: Fever above 38 with a systemic sign
+    when: "temp_c > 38 and (very_fast_breathing or stiff_neck or lethargy or unable_to_stand)"
+    urgency: REFER_NOW
+    status: who_ncbi_reported
+    sources: ["WHO B6"]
+  - id: R29_HEADACHE_VISUAL_OR_SEVERE_VOMITING
+    label: Severe headache with visual disturbance, or severe vomiting
+    when: "(severe_headache and visual_disturbance) or severe_vomiting"
+    urgency: REFER_NOW
+    status: who_ncbi_reported
+    sources: ["WHO B2"]
+  - id: R30_POSTPARTUM_BLEED_FEVER
+    label: Bleeding more than 24 h after delivery with fever
+    when: "postpartum and vaginal_bleeding and hours_since_delivery > 24 and temp_c > 37.2"
+    urgency: WITHIN_24H
+    status: so_verified
+    sources: ["SO-CHEW p320 IX", "SO-JCHEW p319"]
+    scope_ref: "SO-CHEW p320"
+  - id: R31_POSTPARTUM_FEVER
+    label: Postpartum fever of 38 or more
+    when: "postpartum and temp_c >= 38"
+    urgency: WITHIN_24H
+    status: so_verified
+    sources: ["SO-CHEW p325 XIV"]
+  - id: R32_POSTPARTUM_CARDIAC_OR_ANAEMIA
+    label: Postpartum fatigue with cardiac or anaemia sign and abnormal BP
+    when: "postpartum and fatigue_with_cardiac_or_anaemia_sign and (sbp > 140 or dbp > 90 or sbp < 90 or dbp < 50)"
+    urgency: WITHIN_24H
+    status: so_verified
+    sources: ["SO-CHEW p323 V"]
+    scope_ref: "SO-CHEW p323"
+  - id: R33_WHO_PRIORITY_SIGNS
+    label: WHO priority sign (pallor, epigastric pain, headache, visual, fever, breathing)
+    when: "severe_pallor or epigastric_pain or severe_headache or visual_disturbance or temp_c > 38 or difficulty_breathing"
+    urgency: WITHIN_24H
+    status: who_ncbi_reported
+    sources: ["WHO B7"]
+
+  # Follow-up rules: urgency ROUTINE, so they never raise or lower the
+  # referral level. They add an action the worker must take now.
+  - id: R34_HYPERTENSION_TEST_PROTEIN
+    label: Raised BP (140/90 or more, below severe) in pregnancy or postpartum
+    when: "(pregnant or postpartum) and (sbp >= 140 or dbp >= 90) and not (sbp >= 160 or dbp >= 110)"
+    urgency: ROUTINE
+    action: >-
+      Re-check BP after 15 minutes of rest and test urine protein now.
+      Pre-eclampsia is not ruled out until protein is tested. If protein is
+      2+ or more, or a danger symptom appears, the gate will raise urgency.
+      Counsel on danger signs and review at the next antenatal contact.
+    status: who_dak_reported
+    note: >-
+      Follows the WHO ANC digital adaptation kit decision logic: diastolic
+      90 to under 110 with no proteinuria is hypertension managed with
+      counselling, and 110 or more is urgent referral (already R14).
+      Added after the external check showed 159 high-risk rows at 140/90+
+      with no proteinuria recorded.
+    sources: ["WHO SMART ANC DAK decision table ANCDT17 (reported)"]
+  - id: R35_HIGH_BLOOD_SUGAR_ASSESS
+    label: Blood sugar of 11.1 mmol/L or more in pregnancy
+    when: "pregnant and blood_sugar_mmol >= 11.1"
+    urgency: ROUTINE
+    action: >-
+      Arrange a diabetes-in-pregnancy assessment at a facility that can do
+      a fasting or 2-hour glucose test. Not an emergency on its own; refer
+      urgently only if a danger sign is present.
+    status: reported_unverified
+    note: >-
+      WHO 2013 classifies hyperglycaemia first detected in pregnancy as GDM
+      or diabetes in pregnancy, a screening question rather than a danger
+      sign. The 11.1 mmol/L threshold is the WHO diabetes criterion as
+      reported; only the 7.0 mmol/L fasting value was confirmed by search.
+    sources: ["WHO 2013 WHO/NMH/MND/13.2 (reported, threshold unverified)"]
+
+# Non-drug steps the agent may state, each with its page. Drugs are never
+# dosed by MamaGate; the CHEW is pointed to the Standing Orders page.
+non_drug_actions:
+  - {action: "Position her on her left side; keep the airway clear.", page: "SO-CHEW p311, p319"}
+  - {action: "Keep her warm and stay with her.", page: "WHO B3"}
+  - {action: "A health worker should accompany her if possible.", page: "SO-CHEW p319 II"}
+scope_limits:
+  - {limit: "Do not do a vaginal examination in bleeding from 20 weeks.", page: "SO-CHEW p311 III"}
+  - {limit: "Do not attempt repair of a third-degree tear.", page: "SO-CHEW p321 X"}
+
+referral_note_fields:
+  referral: [who_is_referring, facility, referral_date_time,
+             accompanied_by_health_worker, synthetic_id, age,
+             main_reasons_for_referral, emergency_or_not,
+             major_findings_including_bp_and_temp_and_lab,
+             treatments_given_and_time_before_referral,
+             information_given_to_woman_and_companion,
+             triggering_rule_ids]
+  counter_referral: [record_number, admission_date_time, diagnoses,
+                     treatments_given, recommendations_for_further_care,
+                     follow_up_when_where]

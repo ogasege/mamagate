@@ -1,0 +1,78 @@
+{
+  "dataset": "UCI Maternal Health Risk (id 863), CC BY 4.0",
+  "raw_rows": 1014,
+  "unique_rows": 452,
+  "rows_by_label": {
+    "high risk": 112,
+    "low risk": 234,
+    "mid risk": 106
+  },
+  "referrals": {
+    "crosstab": {
+      "high risk": {
+        "REFER_NOW": 9,
+        "WITHIN_24H": 29,
+        "ROUTINE": 74
+      },
+      "mid risk": {
+        "REFER_NOW": 6,
+        "WITHIN_24H": 20,
+        "ROUTINE": 80
+      },
+      "low risk": {
+        "REFER_NOW": 25,
+        "WITHIN_24H": 17,
+        "ROUTINE": 192
+      }
+    },
+    "high_risk_flagged": {
+      "k": 38,
+      "n": 112
+    },
+    "low_risk_flagged": {
+      "k": 42,
+      "n": 234
+    },
+    "refer_now_share": 0.088
+  },
+  "follow_up_action_only": {
+    "high risk": {
+      "k": 60,
+      "n": 112
+    },
+    "mid risk": {
+      "k": 26,
+      "n": 106
+    },
+    "low risk": {
+      "k": 38,
+      "n": 234
+    }
+  },
+  "referral_or_follow_up": {
+    "high risk": {
+      "k": 98,
+      "n": 112
+    },
+    "mid risk": {
+      "k": 52,
+      "n": 106
+    },
+    "low risk": {
+      "k": 80,
+      "n": 234
+    }
+  },
+  "rules_fired": {
+    "R34_HYPERTENSION_TEST_PROTEIN": 117,
+    "R33_WHO_PRIORITY_SIGNS": 80,
+    "R35_HIGH_BLOOD_SUGAR_ASSESS": 55,
+    "R03_SHOCK": 39,
+    "R14_BP_SEVERE_ALONE": 1
+  },
+  "added_follow_up_rules": [
+    "R34_HYPERTENSION_TEST_PROTEIN",
+    "R35_HIGH_BLOOD_SUGAR_ASSESS"
+  ],
+  "caveat": "Labels come from a different risk model and the data has no symptoms, proteinuria or gestational age. Follow-up rules ask for a test or assessment and never change urgency. This checks gate behaviour on real vital signs; it is not accuracy."
+}

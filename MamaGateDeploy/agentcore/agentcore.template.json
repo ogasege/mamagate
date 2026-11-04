@@ -1,0 +1,46 @@
+{
+  "name": "MamaGateDeploy",
+  "version": 2,
+  "managedBy": "CDK",
+  "runtimes": [
+    {
+      "name": "MamaGateAgent",
+      "description": "MamaGate maternal danger-sign gate and referral relay",
+      "build": "CodeZip",
+      "entrypoint": "main.py",
+      "codeLocation": "app/MamaGateAgent",
+      "runtimeVersion": "PYTHON_3_14",
+      "envVars": [
+        {
+          "name": "MAMAGATE_ALERT_TOPIC_ARN",
+          "value": "arn:aws:sns:us-east-1:${ACCOUNT_ID}:mamagate-referral-alerts"
+        },
+        {
+          "name": "MAMAGATE_SCHEDULER_ROLE_ARN",
+          "value": "arn:aws:iam::${ACCOUNT_ID}:role/mamagate-scheduler-role"
+        },
+        {
+          "name": "MAMAGATE_LLM_STEERING",
+          "value": "1"
+        },
+        {
+          "name": "MAMAGATE_SESSION_BUCKET",
+          "value": "mamagate-sessions-${ACCOUNT_ID}"
+        }
+      ],
+      "protocol": "HTTP",
+      "additionalPolicies": [
+        "../deploy/runtime-policy.json"
+      ]
+    }
+  ],
+  "memories": [],
+  "knowledgeBases": [],
+  "credentials": [],
+  "evaluators": [],
+  "onlineEvalConfigs": [],
+  "agentCoreGateways": [],
+  "policyEngines": [],
+  "configBundles": [],
+  "harnesses": []
+}

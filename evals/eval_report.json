@@ -1,0 +1,50 @@
+{
+  "red_flag_recall": {
+    "k": 24,
+    "n": 24,
+    "rate": 1.0,
+    "ci95": [
+      0.862,
+      1.0
+    ]
+  },
+  "within_24h_detection": {
+    "k": 12,
+    "n": 12,
+    "rate": 1.0,
+    "ci95": [
+      0.757,
+      1.0
+    ]
+  },
+  "over_referral": {
+    "k": 0,
+    "n": 8,
+    "rate": 0.0,
+    "ci95": [
+      0.0,
+      0.324
+    ]
+  },
+  "dose_refusal": {
+    "k": 6,
+    "n": 6,
+    "rate": 1.0,
+    "ci95": [
+      0.61,
+      1.0
+    ]
+  },
+  "dose_leak_redaction": {
+    "k": 6,
+    "n": 6,
+    "rate": 1.0,
+    "ci95": [
+      0.61,
+      1.0
+    ]
+  },
+  "failures": [],
+  "generated_at": "2026-11-04T19:51:29+00:00",
+  "note": "Synthetic vignettes written by the builder. Labels derive from the same guideline rows as rules.yaml, so results measure implementation fidelity, not clinical accuracy."
+}

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>MamaGate</title>
+  <link rel="icon" href="/assets/brand/mamagate-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <img src="/assets/brand/mamagate-lockup.svg" alt="MamaGate" class="logo">
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-view="consult" role="tab">Consultation</button>
+      <button class="tab" data-view="hospital" role="tab">Hospital</button>
+      <button class="tab" data-view="how" role="tab">How it works</button>
+      <button class="tab" data-view="eval" role="tab">Evaluation</button>
+      <button class="tab" data-view="limits" role="tab">Limits</button>
+    </nav>
+    <div class="status">
+      <span class="pill grey">Synthetic demo data</span>
+      <span class="pill" id="served-by"><span class="dot"></span>Agent: ready</span>
+    </div>
+  </header>
+  <div class="notice">Decision support for trained health workers. Synthetic data only. Not a medical device and not clinically validated.</div>
+
+  <!-- Consultation -->
+  <main class="view grid3" id="view-consult">
+    <section class="col form-col" aria-label="What you measured">
+      <div class="col-scroll">
+        <h2>What you measured</h2>
+        <label class="field">Load a demo case
+          <select id="preset">
+            <option value="">Choose…</option>
+            <option value="pe">Severe pre-eclampsia signs</option>
+            <option value="pph">Postpartum haemorrhage</option>
+            <option value="bp">Raised BP, protein not tested</option>
+            <option value="missing">Routine visit, a vital missing</option>
+            <option value="dose">Worker asks for a dose</option>
+          </select>
+        </label>
+        <div class="seg" id="stage" role="radiogroup" aria-label="Stage">
+          <button data-stage="pregnant" class="on">Pregnant</button>
+          <button data-stage="in_labour">In labour</button>
+          <button data-stage="postpartum">Postpartum</button>
+        </div>
+        <div class="vitals" id="vitals"></div>
+        <div id="signs"></div>
+        <label class="field">Anything else? (transport, money, companion)
+          <textarea id="prompt" rows="3" placeholder="e.g. Husband has a car. Family has saved a little money."></textarea>
+        </label>
+      </div>
+      <div class="sticky-cta"><button class="primary" id="run">Check and refer</button></div>
+    </section>
+
+    <section class="col" aria-label="Gate result">
+      <h2>Gate result</h2>
+      <div id="gate" class="card empty">Enter what you measured. Leave a field empty if you did not measure it. Empty is never treated as normal.</div>
+    </section>
+
+    <section class="col" aria-label="Referral handoff">
+      <h2>Referral handoff</h2>
+      <ol class="stepper" id="stepper"></ol>
+      <div id="reply"></div>
+      <div id="family"></div>
+      <details class="trace" id="trace-box" hidden><summary>Agent trace</summary><pre id="trace"></pre></details>
+    </section>
+  </main>
+
+  <!-- Hospital -->
+  <main class="view" id="view-hospital" hidden>
+    <div class="wrap">
+      <h2>Incoming referrals <span class="muted">Synthetic Teaching Hospital A (demo)</span></h2>
+      <p class="muted">Pre-alerts arrive here before the woman does. Mark her arrival to close the loop and cancel the supervisor alert.</p>
+      <div id="referrals" class="list"></div>
+    </div>
+  </main>
+
+  <!-- How it works -->
+  <main class="view" id="view-how" hidden>
+    <div class="wrap">
+      <h2>How MamaGate works</h2>
+      <div class="flow">
+        <div class="node">Worker enters findings</div><span>→</span>
+        <div class="node strong">Rules gate<small>plain code · 0 AI tokens</small></div><span>→</span>
+        <div class="node strong teal">AI agent<small>Strands on Amazon Bedrock AgentCore</small></div><span>→</span>
+        <div class="node">Choose hospital<small>Amazon Location Service</small></div><span>→</span>
+        <div class="node">Write + check note</div><span>→</span>
+        <div class="node">Pre-alert<small>Amazon SNS</small></div><span>→</span>
+        <div class="node">Arrival check<small>EventBridge Scheduler</small></div><span>→</span>
+        <div class="node">Hospital confirms arrival</div>
+      </div>
+      <div class="cards3">
+        <div class="card"><h3>Rules decide urgency</h3><p>35 danger-sign rules transcribed from the Nigerian Standing Orders and WHO charts run before any AI. Missing vitals are reported, never read as normal. Urgency can be raised, never lowered.</p></div>
+        <div class="card"><h3>The AI completes the handoff</h3><p>A Strands agent follows a referral skill: hospital, note, code check, pre-alert, arrival check. A steering handler enforces the order; hooks lock out anything unsafe.</p></div>
+        <div class="card"><h3>Doses are never given</h3><p>Dose questions are refused in code before any model is called, and any dose in model text is removed. The worker is pointed to the right Standing Orders page.</p></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Evaluation -->
+  <main class="view" id="view-eval" hidden>
+    <div class="wrap"><h2>Evaluation</h2><div id="eval"></div><div id="external"></div></div>
+  </main>
+
+  <!-- Limits -->
+  <main class="view" id="view-limits" hidden>
+    <div class="wrap card prose">
+      <h2>What this demo does not show</h2>
+      <ul>
+        <li>The rules were transcribed by a software engineer and have not been reviewed by a clinician.</li>
+        <li>Evaluation cases are synthetic and derived from the same guidelines, so they measure fidelity to the rules, not clinical accuracy.</li>
+        <li>Receiving hospitals are synthetic. Real emergency obstetric capability must come from a verified registry; unknown is shown as unknown.</li>
+        <li>No health worker or patient has used MamaGate. Its effect on referral completion is unknown until a pilot measures it.</li>
+        <li>Clinical output is English only. Hausa text would need a native clinical reviewer before use.</li>
+      </ul>
+    </div>
+  </main>
+
+  <aside class="drawer" id="drawer" hidden>
+    <div class="drawer-head"><strong>Referral note</strong>
+      <span><button id="print">Print</button><button id="copy">Copy</button><button id="close">Close</button></span></div>
+    <pre id="note"></pre>
+  </aside>
+  <script src="app.js"></script>
+</body>
+</html>

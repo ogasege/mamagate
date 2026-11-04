@@ -1,0 +1,47 @@
+[project]
+name = "mamagate"
+version = "0.1.0"
+readme = "README.md"
+license = "Apache-2.0"
+authors = [{ name = "Oluwasegun Adedigba" }]
+description = "Code-first maternal danger-sign gate and referral relay for Nigerian PHC workers (Strands Agents SDK)"
+requires-python = ">=3.13"
+dependencies = [
+    "aws-opentelemetry-distro>=0.22.0",
+    "bedrock-agentcore>=1.25.3",
+    "boto3>=1.43.123",
+    "botocore[crt]>=1.43.123",
+    "fastapi>=0.162.0",
+    "pyyaml>=6.0.3",
+    "strands-agents>=1.63.0",
+    "strands-agents-evals>=1.8.0",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "ruff>=0.17.3",
+]
+
+[tool.ruff]
+line-length = 79
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "D"]
+ignore = ["D203", "D213"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D103", "D104"]
+"evals/*" = ["D103"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["mamagate"]

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="t">
+  <title id="t">MamaGate icon, one colour</title>
+  <path d="M136 432 V236 a120 120 0 0 1 240 0 V432" fill="none" stroke="#101828" stroke-width="40" stroke-linecap="round"/>
+    <path d="M190 432 L236 300 H276 L322 432 Z" fill="#101828" stroke="#101828" stroke-width="12" stroke-linejoin="round"/>
+    <circle cx="256" cy="232" r="36" fill="#101828"/>
+</svg>

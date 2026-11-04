@@ -1,0 +1,45 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Local state and secrets
+.env
+.env.*
+sessions/
+.agentcore/
+*.log
+.DS_Store
+.pytest_cache/
+.ruff_cache/
+
+
+.remember/
+
+# AgentCore deploy artefacts and account-specific targets
+MamaGateDeploy/agentcore/.cache/
+MamaGateDeploy/agentcore/cdk/cdk.out/
+MamaGateDeploy/agentcore/cdk/node_modules/
+MamaGateDeploy/agentcore/cdk/dist/
+MamaGateDeploy/agentcore/.env.local
+MamaGateDeploy/agentcore/aws-targets.json
+MamaGateDeploy/app/MamaGateAgent/mamagate/
+MamaGateDeploy/app/MamaGateAgent/main.py
+MamaGateDeploy/app/deploy/
+# Generated media
+build/
+*.mp3
+*.wav
+*.mp4
+MamaGateDeploy/agentcore/.cli/
+!.env.example
+
+# Rendered from *.template.json with the real AWS account ID
+deploy/runtime-policy.json
+MamaGateDeploy/agentcore/agentcore.json
