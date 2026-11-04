@@ -2,7 +2,7 @@
 
 Reads the narration from ``docs/video/script.md``. Uses Aethex
 (Nigerian English voice) when ``AETHEX_API_KEY`` works, otherwise
-Amazon Polly's Ayanda neural voice (South African English).
+Amazon Polly's Ayanda generative voice (South African English).
 
 Usage: ``uv run python scripts/make_voiceover.py [--engine polly|aethex]``
 """
@@ -28,7 +28,8 @@ AETHEX_VOICE = os.environ.get(
 def narration_blocks() -> list[str]:
     """Return the narration paragraphs in order."""
     text = SCRIPT.read_text(encoding="utf-8")
-    body = text.split("## Narration")[1].split("## On-screen")[0]
+    body = text.split("## Narration")[1]
+    body = re.split(r"## (?:Language clips|On-screen)", body)[0]
     parts = re.split(r"\*\*\d\..*?\*\*", body)
     return [" ".join(p.split()) for p in parts if p.strip()]
 
@@ -47,12 +48,12 @@ def aethex(text: str, path: Path) -> None:
 
 
 def polly(text: str, path: Path) -> None:
-    """Synthesise one block with Amazon Polly (Ayanda, neural)."""
+    """Synthesise one block with Amazon Polly (Ayanda, generative)."""
     import boto3
 
     client = boto3.client("polly", region_name="us-east-1")
     audio = client.synthesize_speech(
-        Text=text, VoiceId="Ayanda", Engine="neural", OutputFormat="mp3",
+        Text=text, VoiceId="Ayanda", Engine="generative", OutputFormat="mp3",
         SampleRate="24000")
     mp3 = path.with_suffix(".mp3")
     mp3.write_bytes(audio["AudioStream"].read())

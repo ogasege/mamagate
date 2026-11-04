@@ -43,3 +43,6 @@ MamaGateDeploy/agentcore/.cli/
 # Rendered from *.template.json with the real AWS account ID
 deploy/runtime-policy.json
 MamaGateDeploy/agentcore/agentcore.json
+
+# Lovable design export (reference only; contains its own .env)
+ae25fd85-*/

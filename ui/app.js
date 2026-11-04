@@ -4,6 +4,7 @@
 const $ = (sel) => document.querySelector(sel);
 const md = (s) => esc(s)
   .replace(/^\s*-{3,}\s*$/gm, "")
+  .replace(/^#{1,6}\s*(.+)$/gm, "<b>$1</b>")
   .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
   .replace(/\s(\d+)\.\s/g, "\n$1. ")
   .replace(/\n{2,}/g, "\n")
@@ -15,7 +16,6 @@ const VITALS = [
   ["ga_weeks", "Gestational age", "wk"], ["sbp", "Systolic", "mmHg"],
   ["dbp", "Diastolic", "mmHg"], ["pulse", "Pulse", "/min"],
   ["resp_rate", "Resp. rate", "/min"], ["temp_c", "Temperature", "°C"],
-  ["urine_protein_plus", "Urine protein", "+"],
   ["blood_loss_ml", "Blood loss", "ml"], ["hb_g_dl", "Hb", "g/dL"],
   ["blood_sugar_mmol", "Blood sugar", "mmol/L"],
   ["labour_hours", "Labour", "h"], ["fhr", "Fetal heart", "/min"],
@@ -78,6 +78,15 @@ const STEPS = [
 ];
 
 let stage = "pregnant";
+let protein = null;
+
+function setProtein(p) {
+  protein = p;
+  document.querySelectorAll("#protein button").forEach((b) =>
+    b.classList.toggle("on", p !== null && Number(b.dataset.p) === p));
+  $("#protein-lbl").textContent = p === null ? "Urine protein: not tested" :
+    `Urine protein: ${p === 0 ? "0" : `${p}+`}`;
+}
 let lastNote = "";
 
 function buildForm() {
@@ -92,6 +101,24 @@ function buildForm() {
     c.addEventListener("click", () => c.classList.toggle("on")));
   document.querySelectorAll("#stage button").forEach((b) =>
     b.addEventListener("click", () => setStage(b.dataset.stage)));
+  document.querySelectorAll("#protein button").forEach((b) =>
+    b.addEventListener("click", () => {
+      const v = Number(b.dataset.p);
+      setProtein(protein === v ? null : v);
+    }));
+}
+
+function clearForm() {
+  VITALS.forEach(([k]) => { $(`#v-${k}`).value = ""; });
+  document.querySelectorAll(".chip").forEach((c) => c.classList.remove("on"));
+  setProtein(null);
+  setStage("pregnant");
+  $("#prompt").value = "";
+  $("#preset").value = "";
+  $("#gate").className = "card empty";
+  $("#gate").textContent = "Enter what you measured. Leave a field empty if you did not measure it. Empty is never treated as normal.";
+  renderSteps({});
+  $("#reply").innerHTML = ""; $("#family").innerHTML = "";
 }
 
 function setStage(s) {
@@ -107,6 +134,7 @@ function loadPreset(key) {
   document.querySelectorAll(".chip").forEach((c) =>
     c.classList.toggle("on", Boolean(p[c.dataset.flag])));
   setStage(p.stage);
+  setProtein(p.urine_protein_plus ?? null);
   $("#prompt").value = p.prompt || "";
   $("#run").dataset.sid = p.synthetic_id;
   $("#run").dataset.age = p.age;
@@ -119,6 +147,7 @@ function collectCase() {
     const v = $(`#v-${k}`).value.trim();
     if (v !== "") c[k] = Number(v);
   });
+  if (protein !== null) c.urine_protein_plus = protein;
   document.querySelectorAll(".chip.on").forEach((ch) => {
     c[ch.dataset.flag] = true;
   });
@@ -152,7 +181,7 @@ function renderGate(t, gateMs) {
     `<span class="badge ${u}">${ICON[u]} ${LABEL[u]}</span>` +
     `<div class="proof mono">Decided by rules in ${gateMs} ms · 0 AI tokens · ` +
     `rules v${esc(t.rules_version)}</div>${none}` +
-    (rules ? `<h3 style="margin-top:12px">Danger signs found</h3>${rules}` : "") +
+    (rules ? `<h3 class="dsf">Danger signs found</h3>${rules}` : "") +
     warns + acts + missing;
 }
 
@@ -160,7 +189,7 @@ function renderSteps(state) {
   $("#stepper").innerHTML = STEPS.map(([key, done, busy]) => {
     const s = state[key] || { status: "pending" };
     const title = s.status === "active" ? busy : done;
-    return `<li class="step ${s.status}"><span class="ic"></span><div>` +
+    return `<li class="step ${s.status}"><span class="ic"></span><span class="travel"></span><div>` +
       `<div class="t">${title}</div><div class="d">${s.detail || ""}</div></div></li>`;
   }).join("");
 }
@@ -187,7 +216,7 @@ function finalSteps(r) {
   if (note) {
     const cap = note.facility_emonc_capability;
     box.facility = { status: "done", detail:
-      `${esc(note.facility)}<span class="tag ${cap === "yes" ? "yes" : "unknown"}">` +
+      `<span class="facility">${esc(note.facility)}</span><br><span class="tag ${cap === "yes" ? "yes" : "unknown"}">` +
       `EmONC ${esc(cap)}</span><br>${travel.distance_km} km · ${travel.minutes} min` +
       ` · <span class="mono">${esc(travel.provider)}</span>` +
       (cap !== "yes" ? "<br>Capability unknown: phone ahead." : "") };
@@ -204,9 +233,25 @@ function finalSteps(r) {
     detail: `If arrival is not confirmed by ${esc(c.due_utc)} UTC, the ` +
       `supervisor is alerted (${c.status === "scheduled" ?
         "EventBridge Scheduler" : esc(c.status)})` };
-  renderSteps(box);
-  const v = $("#view-note");
-  if (v) v.addEventListener("click", openNote);
+  flowSteps(box);
+}
+
+function flowSteps(box) {
+  const keys = STEPS.map(([k]) => k);
+  const shown = {};
+  let i = 0;
+  const next = () => {
+    if (i > 0) shown[keys[i - 1]] = box[keys[i - 1]] || { status: "pending" };
+    if (i < keys.length) {
+      shown[keys[i]] = box[keys[i]] ? { status: "active" } : { status: "pending" };
+    }
+    renderSteps(shown);
+    const v = $("#view-note");
+    if (v) v.addEventListener("click", openNote);
+    i += 1;
+    if (i <= keys.length) setTimeout(next, i === 1 ? 250 : 650);
+  };
+  next();
 }
 
 let familyCard = null;
@@ -247,7 +292,38 @@ function renderFamily(card) {
   });
 }
 
-function openNote() { $("#note").textContent = lastNote; $("#drawer").hidden = false; }
+function noteToHtml(markdown) {
+  const inline = (s) => esc(s)
+    .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+    .replace(/(^|\s)\*(.+?)\*(?=\s|$)/g, "$1<i>$2</i>")
+    .replace(/_{4,}/g, '<span class="blank"></span>');
+  const out = [];
+  let list = false;
+  for (const raw of String(markdown).split("\n")) {
+    const line = raw.replace(/\s+$/, "");
+    if (line.startsWith("- ")) {
+      if (!list) { out.push("<ul>"); list = true; }
+      out.push(`<li>${inline(line.slice(2))}</li>`);
+      continue;
+    }
+    if (list) { out.push("</ul>"); list = false; }
+    if (line.startsWith("## ")) out.push(`<h3>${inline(line.slice(3))}</h3>`);
+    else if (line.startsWith("# ")) out.push(`<h2>${inline(line.slice(2))}</h2>`);
+    else if (line.trim()) out.push(`<p>${inline(line)}</p>`);
+  }
+  if (list) out.push("</ul>");
+  return out.join("");
+}
+
+function noteToText(markdown) {
+  return String(markdown).replace(/\*\*/g, "").replace(/^#+\s*/gm, "")
+    .replace(/^\*(.+)\*$/gm, "$1");
+}
+
+function openNote() {
+  $("#note").innerHTML = noteToHtml(lastNote);
+  $("#drawer").hidden = false;
+}
 
 async function run() {
   const btn = $("#run");
@@ -412,6 +488,7 @@ document.querySelectorAll(".tab").forEach((t) =>
   t.addEventListener("click", () => showView(t.dataset.view)));
 $("#preset").addEventListener("change", (e) => loadPreset(e.target.value));
 $("#run").addEventListener("click", run);
+$("#clear").addEventListener("click", clearForm);
 $("#close").addEventListener("click", () => { $("#drawer").hidden = true; });
 $("#print").addEventListener("click", () => window.print());
-$("#copy").addEventListener("click", () => navigator.clipboard.writeText(lastNote));
+$("#copy").addEventListener("click", () => navigator.clipboard.writeText(noteToText(lastNote)));

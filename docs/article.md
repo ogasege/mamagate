@@ -58,26 +58,26 @@ facilities is the gap.
 
 ## Architecture
 
-```
-CHEW enters findings
-   │
-   ▼
-Rules gate (plain Python, 35 rules, 0 AI tokens) ──► urgency + rule IDs + missing vitals
-   │
-   ▼
-Strands agent on Amazon Bedrock AgentCore Runtime
-   ├─ skills: referral-handoff, birth-preparedness, counter-referral
-   ├─ tools: get_triage_result → find_receiving_facility (Amazon Location)
-   │         → select_facility → draft_referral_note (specialist agent)
-   │         → verify_referral_note (code) → send_pre_alert (Amazon SNS)
-   │         → schedule_arrival_check (EventBridge Scheduler)
-   ├─ steering: deterministic workflow order (LedgerProvider) + LLM language review
-   ├─ hooks: gate-and-dose lock, rate limiter, audit trail
-   └─ sessions: S3SessionManager
-   │
-   ▼
-Hospital view: mark arrived → delete schedule + notify clinic
-```
+![MamaGate architecture](https://raw.githubusercontent.com/ogasege/mamagate/main/docs/diagrams/architecture.png)
+
+**Why it is shaped this way:** urgency is decided by code before any model
+runs, because it must be deterministic, testable and auditable. The agent
+only coordinates the handoff, and the flow ends at a confirmed arrival,
+because arrival is the outcome that matters.
+
+![MamaGate referral loop](https://raw.githubusercontent.com/ogasege/mamagate/main/docs/diagrams/referral-loop.png)
+
+**Why a loop:** in Kano only one in ten referred women completed the
+referral. A referral that never arrives has to be noticed, so an
+EventBridge schedule alerts a supervisor unless the hospital marks her
+arrived.
+
+![MamaGate safety layers](https://raw.githubusercontent.com/ogasege/mamagate/main/docs/diagrams/safety-layers.png)
+
+**Why two kinds of guard:** rules that must never fail (dose refusal, tool
+order, the urgency floor) are code; judgement calls (tone, diagnosis
+wording) go to an LLM reviewer, the same split the workshop teaches with
+deterministic and LLM steering.
 
 ## Technical execution with the Strands Agents SDK
 

@@ -29,7 +29,7 @@
   <main class="view grid3" id="view-consult">
     <section class="col form-col" aria-label="What you measured">
       <div class="col-scroll">
-        <h2>What you measured</h2>
+        <div class="col-head"><h2>What you measured</h2><button class="clear" id="clear">Clear</button></div>
         <label class="field">Load a demo case
           <select id="preset">
             <option value="">Choose…</option>
@@ -40,12 +40,18 @@
             <option value="dose">Worker asks for a dose</option>
           </select>
         </label>
+        <span class="lbl">Stage</span>
         <div class="seg" id="stage" role="radiogroup" aria-label="Stage">
           <button data-stage="pregnant" class="on">Pregnant</button>
           <button data-stage="in_labour">In labour</button>
           <button data-stage="postpartum">Postpartum</button>
         </div>
         <div class="vitals" id="vitals"></div>
+        <span class="lbl" id="protein-lbl">Urine protein: not tested</span>
+        <div class="seg protein" id="protein" role="radiogroup" aria-label="Urine protein">
+          <button data-p="0">0</button><button data-p="1">1+</button>
+          <button data-p="2">2+</button><button data-p="3">3+</button>
+        </div>
         <div id="signs"></div>
         <label class="field">Anything else? (transport, money, companion)
           <textarea id="prompt" rows="3" placeholder="e.g. Husband has a car. Family has saved a little money."></textarea>
@@ -81,20 +87,15 @@
   <main class="view" id="view-how" hidden>
     <div class="wrap">
       <h2>How MamaGate works</h2>
-      <div class="flow">
-        <div class="node">Worker enters findings</div><span>→</span>
-        <div class="node strong">Rules gate<small>plain code · 0 AI tokens</small></div><span>→</span>
-        <div class="node strong teal">AI agent<small>Strands on Amazon Bedrock AgentCore</small></div><span>→</span>
-        <div class="node">Choose hospital<small>Amazon Location Service</small></div><span>→</span>
-        <div class="node">Write + check note</div><span>→</span>
-        <div class="node">Pre-alert<small>Amazon SNS</small></div><span>→</span>
-        <div class="node">Arrival check<small>EventBridge Scheduler</small></div><span>→</span>
-        <div class="node">Hospital confirms arrival</div>
-      </div>
+      <figure class="diagram"><img src="/diagrams/architecture.png" alt="MamaGate architecture"></figure>
       <div class="cards3">
         <div class="card"><h3>Rules decide urgency</h3><p>35 danger-sign rules transcribed from the Nigerian Standing Orders and WHO charts run before any AI. Missing vitals are reported, never read as normal. Urgency can be raised, never lowered.</p></div>
         <div class="card"><h3>The AI completes the handoff</h3><p>A Strands agent follows a referral skill: hospital, note, code check, pre-alert, arrival check. A steering handler enforces the order; hooks lock out anything unsafe.</p></div>
         <div class="card"><h3>Doses are never given</h3><p>Dose questions are refused in code before any model is called, and any dose in model text is removed. The worker is pointed to the right Standing Orders page.</p></div>
+      </div>
+      <div class="cards2">
+        <figure class="diagram"><img src="/diagrams/referral-loop.png" alt="MamaGate referral loop"></figure>
+        <figure class="diagram"><img src="/diagrams/safety-layers.png" alt="MamaGate safety layers"></figure>
       </div>
     </div>
   </main>
@@ -113,7 +114,7 @@
         <li>Evaluation cases are synthetic and derived from the same guidelines, so they measure fidelity to the rules, not clinical accuracy.</li>
         <li>Receiving hospitals are synthetic. Real emergency obstetric capability must come from a verified registry; unknown is shown as unknown.</li>
         <li>No health worker or patient has used MamaGate. Its effect on referral completion is unknown until a pilot measures it.</li>
-        <li>Clinical output is English only. Hausa text would need a native clinical reviewer before use.</li>
+        <li>Clinical output is English. The family card has draft translations in Pidgin, Hausa, Yoruba and Igbo that still need review by native clinical speakers.</li>
       </ul>
     </div>
   </main>
@@ -121,7 +122,7 @@
   <aside class="drawer" id="drawer" hidden>
     <div class="drawer-head"><strong>Referral note</strong>
       <span><button id="print">Print</button><button id="copy">Copy</button><button id="close">Close</button></span></div>
-    <pre id="note"></pre>
+    <article id="note" class="doc"></article>
   </aside>
   <script src="app.js"></script>
 </body>

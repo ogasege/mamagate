@@ -24,6 +24,20 @@ often the decision, the journey and the handover rather than the diagnosis:
 in a Kano study (Ishaku et al., 2013), only one in ten women given
 pre-referral treatment completed the referral. MamaGate targets that gap.
 
+## Architecture
+
+![MamaGate architecture](docs/diagrams/architecture.png)
+
+*Why: urgency is decided by code before any model runs; the agent only
+coordinates the handoff, and the loop ends at a confirmed arrival.*
+
+![MamaGate safety layers](docs/diagrams/safety-layers.png)
+
+![MamaGate referral loop](docs/diagrams/referral-loop.png)
+
+Every requirement and criterion, with the reason for each choice, is in
+[docs/submission-checklist.md](docs/submission-checklist.md).
+
 ## What it does
 
 | Step | Who owns it | AWS / Strands |

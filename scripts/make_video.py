@@ -21,14 +21,18 @@ GAP = 0.35  # silence between blocks, seconds
 
 # block number -> list of (frame file, share of the block's duration)
 TIMELINE = {
-    1: [("00_title.jpg", 0.25), ("00b_problem.jpg", 0.75)],
-    2: [("02_case_loaded.jpg", 0.22), ("03_gate.jpg", 0.78)],
-    3: [("04_handoff_running.jpg", 0.16), ("05_handoff_done.jpg", 0.34),
-        ("07_note.jpg", 0.25), ("06_family_card.jpg", 0.25)],
-    4: [("08_hospital_expected.jpg", 0.45), ("09_hospital_arrived.jpg", 0.55)],
-    5: [("10_dose_refused.jpg", 1.0)],
-    6: [("11_how.jpg", 0.4), ("12_eval.jpg", 0.6)],
-    7: [("13_limits.jpg", 0.45), ("14_end.jpg", 0.55)],
+    1: [("00_title.jpg", 0.3), ("00b_problem.jpg", 0.7)],
+    2: [("02_case_loaded.jpg", 0.25), ("03_gate.jpg", 0.75)],
+    3: [("d1_architecture.png", 0.3), ("04_handoff_running.jpg", 0.15),
+        ("05_handoff_done.jpg", 0.3), ("07_note.jpg", 0.25)],
+    4: [("06_family_card.jpg", 0.2), ("06b_card_pidgin.jpg", 0.2),
+        ("06c_card_hausa.jpg", 0.2), ("06d_card_yoruba.jpg", 0.2),
+        ("06e_card_igbo.jpg", 0.2)],
+    5: [("d2_loop.png", 0.3), ("08_hospital_expected.jpg", 0.3),
+        ("09_hospital_arrived.jpg", 0.4)],
+    6: [("10_dose_refused.jpg", 0.6), ("d3_safety.png", 0.4)],
+    7: [("12_eval.jpg", 1.0)],
+    8: [("13_limits.jpg", 0.45), ("14_end.jpg", 0.55)],
 }
 
 

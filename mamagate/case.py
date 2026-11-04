@@ -85,6 +85,7 @@ def build_note(ctx: CaseContext, narrative: dict[str, str]) -> dict:
         "triggering_rule_ids": ctx.triage.rule_ids,
         "rule_sources": {r.rule_id: list(r.sources)
                          for r in ctx.triage.fired},
+        "rule_labels": {r.rule_id: r.label for r in ctx.triage.fired},
         "warnings": [r.warning for r in ctx.triage.fired if r.warning],
         "treatments_given_and_time_before_referral": (
             "Record here what you gave and when, as authorised in your "
@@ -127,30 +128,92 @@ def verify_note(ctx: CaseContext) -> list[str]:
     return problems
 
 
+FINDING_LABELS = {
+    "ga_weeks": ("Gestational age", "weeks"),
+    "pulse": ("Pulse", "/min"),
+    "resp_rate": ("Respiratory rate", "/min"),
+    "temp_c": ("Temperature", "°C"),
+    "urine_protein_plus": ("Urine protein", "+"),
+    "blood_loss_ml": ("Blood loss", "ml"),
+    "pad_soaked_minutes": ("Pad soaked in", "min"),
+    "hb_g_dl": ("Haemoglobin", "g/dL"),
+    "pcv_pct": ("PCV", "%"),
+    "blood_sugar_mmol": ("Blood sugar", "mmol/L"),
+    "labour_hours": ("Labour so far", "h"),
+    "second_stage_hours": ("Second stage", "h"),
+    "third_stage_minutes": ("Third stage", "min"),
+    "fhr": ("Fetal heart rate", "/min"),
+    "hours_since_delivery": ("Since delivery", "h"),
+    "weight_gain_kg_week": ("Weight gain", "kg/week"),
+}
+STAGE_FLAGS = {"pregnant": "Pregnant", "in_labour": "In labour",
+               "postpartum": "Postpartum"}
+HIDDEN = {"synthetic_id", "age", "phc_name", "facility_lat",
+          "facility_lon", "notes", "sbp", "dbp"}
+
+
+def _number(value: Any) -> str:
+    """Format a number without a trailing .0."""
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return str(value)
+    return str(int(number)) if number.is_integer() else f"{number:g}"
+
+
+def format_findings(findings: dict[str, Any]) -> list[str]:
+    """Return the findings as labelled, human-readable lines."""
+    lines = []
+    stage = [v for k, v in STAGE_FLAGS.items() if findings.get(k)]
+    if stage:
+        lines.append("Stage: " + ", ".join(stage))
+    if findings.get("sbp") is not None or findings.get("dbp") is not None:
+        lines.append(f"Blood pressure: {_number(findings.get('sbp', '?'))}/"
+                     f"{_number(findings.get('dbp', '?'))} mmHg")
+    for key, value in findings.items():
+        if key in HIDDEN or key in STAGE_FLAGS or value in (None, False, ""):
+            continue
+        if key in FINDING_LABELS:
+            label, unit = FINDING_LABELS[key]
+            suffix = unit if unit[0] in "+%/" else f" {unit}"
+            lines.append(f"{label}: {_number(value)}{suffix}")
+        elif value is True:
+            lines.append(key.replace("_", " ").capitalize() + ": yes")
+    return lines
+
+
 def render_note_markdown(note: dict[str, Any]) -> str:
-    """Render the referral note as Markdown for display or printing."""
+    """Render the referral note as readable Markdown for display or print."""
     travel = note.get("travel") or {}
+    urgency = note["emergency_or_not"].replace("_", " ")
+    sources = note.get("rule_sources", {})
+    labels = note.get("rule_labels", {})
     lines = [
-        f"# Referral note {note['referral_id']}  ({note['emergency_or_not']})",
+        f"# Referral note · {urgency}",
         "",
+        f"**Referral ID:** {note['referral_id']}  ",
         f"**From:** {note['who_is_referring']}  ",
         f"**To:** {note['facility']} "
-        f"(EmONC capability: {note['facility_emonc_capability']})  ",
-        f"**Time:** {note['referral_date_time']}  ",
+        f"(emergency obstetric care: {note['facility_emonc_capability']})  ",
+        f"**Sent:** {note['referral_date_time']}  ",
         f"**Woman:** {note['synthetic_id']}, age {note['age']}",
         "",
-        "## Danger signs (code-owned gate)",
+        "## Danger signs found",
     ]
-    lines += [f"- {rid}" for rid in note["triggering_rule_ids"]] or ["- none"]
+    for rid in note["triggering_rule_ids"]:
+        label = labels.get(rid, rid)
+        src = "; ".join(sources.get(rid, []))
+        lines.append(f"- {label} ({rid.split('_')[0]}; {src})")
+    if not note["triggering_rule_ids"]:
+        lines.append("- None of the listed danger signs")
     if note["warnings"]:
-        lines += ["", "**Warnings:** " + " ".join(note["warnings"])]
-    lines += [
-        "",
-        "## Findings",
-        ", ".join(f"{k}={v}" for k, v in note["major_findings"].items()),
-    ]
+        lines += ["", "**Warning:** " + " ".join(note["warnings"])]
+    lines += ["", "## Findings"]
+    lines += [f"- {line}" for line in format_findings(note["major_findings"])]
     if note["not_measured"]:
-        lines.append("Not measured: " + ", ".join(note["not_measured"]))
+        lines.append("- Not measured: " + ", ".join(
+            FINDING_LABELS.get(m, (m, ""))[0] if m in FINDING_LABELS else m
+            for m in note["not_measured"]))
     lines += [
         "",
         "## Reasons for referral",
@@ -159,23 +222,26 @@ def render_note_markdown(note: dict[str, Any]) -> str:
         "## Treatment before referral",
         note["treatments_given_and_time_before_referral"],
         "",
+        "Given: ______________________  Time: ________",
+        "",
         "## Transport",
         note["transport_plan"],
     ]
     if travel:
-        lines.append(
-            f"Distance {travel.get('distance_km')} km, about "
-            f"{travel.get('minutes')} min ({travel.get('provider')}).")
+        lines += ["", f"Distance about {travel.get('distance_km')} km, "
+                  f"about {travel.get('minutes')} minutes by road "
+                  f"({travel.get('note', travel.get('provider'))})."]
     lines += [
         "",
         "## Told to the woman and companion",
         note["information_given_to_woman_and_companion"],
         "",
-        "## Counter-referral (please return to the referring PHC)",
-        ", ".join(note["counter_referral_request"]),
-        "",
-        f"_{note['disclaimer']}_",
+        "## Counter-referral: please complete and return to the clinic",
     ]
+    lines += [f"- {field.replace('_', ' ').capitalize()}: "
+              "______________________"
+              for field in note["counter_referral_request"]]
+    lines += ["", f"*{note['disclaimer']}*"]
     return "\n".join(lines)
 
 

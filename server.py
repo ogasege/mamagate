@@ -17,7 +17,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -48,7 +48,8 @@ EVAL_REPORT = Path(__file__).parent / "evals" / "eval_report.json"
 app = FastAPI(title="MamaGate bridge")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.environ.get("MAMAGATE_UI_ORIGINS", "*").split(","),
+    allow_origins=os.environ.get(
+        "MAMAGATE_UI_ORIGINS", "http://localhost:8899").split(","),
     allow_methods=["POST", "GET"],
     allow_headers=["*"],
 )
@@ -81,6 +82,18 @@ def _invoke_runtime(payload: dict[str, Any]) -> dict[str, Any]:
     return data
 
 
+def require_key(x_api_key: str | None = Header(default=None)) -> None:
+    """Require ``X-API-Key`` on writes when MAMAGATE_API_KEY is set.
+
+    The demo server binds to 127.0.0.1. Set MAMAGATE_API_KEY before
+    exposing it beyond the local machine; a pilot would use per-facility
+    identities (for example Amazon Cognito) instead.
+    """
+    expected = os.environ.get("MAMAGATE_API_KEY")
+    if expected and x_api_key != expected:
+        raise HTTPException(401, "Missing or invalid API key")
+
+
 def _load_referrals() -> list[dict[str, Any]]:
     """Return stored referrals, newest first."""
     if not REFERRALS.exists():
@@ -94,7 +107,7 @@ def _save_referrals(rows: list[dict[str, Any]]) -> None:
     REFERRALS.write_text(json.dumps(rows, indent=2), encoding="utf-8")
 
 
-@app.post("/invoke")
+@app.post("/invoke", dependencies=[Depends(require_key)])
 def invoke(payload: dict[str, Any]) -> dict[str, Any]:
     """Run one consultation through the runtime or locally."""
     if not isinstance(payload.get("case"), dict):
@@ -139,7 +152,7 @@ def invoke(payload: dict[str, Any]) -> dict[str, Any]:
     return data
 
 
-@app.post("/gate")
+@app.post("/gate", dependencies=[Depends(require_key)])
 def gate(payload: dict[str, Any]) -> dict[str, Any]:
     """Run only the code-owned gate (no model), for an instant result."""
     import time
@@ -202,7 +215,8 @@ def referrals() -> list[dict[str, Any]]:
     return _load_referrals()
 
 
-@app.post("/referrals/{referral_id}/arrival")
+@app.post("/referrals/{referral_id}/arrival",
+          dependencies=[Depends(require_key)])
 def arrival(referral_id: str, body: dict[str, Any]) -> dict[str, Any]:
     """Record arrival or non-arrival and close the referral loop."""
     rows = _load_referrals()
@@ -240,4 +254,7 @@ UI_DIR = ROOT / "ui"
 if UI_DIR.exists():
     app.mount("/assets", StaticFiles(directory=ROOT / "assets"),
               name="assets")
+    app.mount("/diagrams",
+              StaticFiles(directory=ROOT / "docs" / "diagrams"),
+              name="diagrams")
     app.mount("/", StaticFiles(directory=UI_DIR, html=True), name="ui")
