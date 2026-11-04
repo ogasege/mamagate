@@ -3,7 +3,7 @@
 *A rules gate and referral relay for community health workers in Nigerian
 primary health care. Health focus area.*
 
-**Demo video:** [VIDEO LINK] · **Code:** [github.com/ogasege/mamagate](https://github.com/ogasege/mamagate)
+**Demo video:** [youtu.be/mhFnBA8rcGI](https://youtu.be/mhFnBA8rcGI) · **Code:** [github.com/ogasege/mamagate](https://github.com/ogasege/mamagate)
 
 > Synthetic demo data. Decision support for trained health workers. Not a
 > medical device. The rules have not been reviewed by a clinician.

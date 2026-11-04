@@ -12,7 +12,7 @@ A rules gate in plain code decides in a millisecond whether a pregnant woman mus
 
 ## Body
 
-Paste the whole of `docs/article.md`, after replacing `[VIDEO LINK]` with
+Paste the whole of `docs/article.md`, after replacing `[youtu.be/mhFnBA8rcGI](https://youtu.be/mhFnBA8rcGI)` with
 your YouTube URL. The diagrams load from the public GitHub repository.
 
 ## Cover image
@@ -45,7 +45,7 @@ Leave empty.
 
 - [ ] Video uploaded to YouTube as **Public** (not Unlisted or Private) and
       opened in a private window to check it plays.
-- [ ] `[VIDEO LINK]` in the body replaced with the YouTube URL.
+- [ ] `[youtu.be/mhFnBA8rcGI](https://youtu.be/mhFnBA8rcGI)` in the body replaced with the YouTube URL.
 - [ ] Repository opens in a private window: https://github.com/ogasege/mamagate
 - [ ] Markdown toggle on; Preview shows the three diagrams.
 - [ ] Submitted before 07:59 WAT (11:59 PM PDT, 4 November).
