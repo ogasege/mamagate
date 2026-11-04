@@ -56,22 +56,23 @@ Doses are never given: dose questions are refused in code before any model
 call, dosed tool inputs are rejected, and any dose in model text is removed.
 Urgency can be raised by the agent but never lowered.
 
-## How it follows the workshop, and where it goes further
+## How it is built
 
-| Workshop module | In MamaGate |
+| Strands feature | In MamaGate |
 |---|---|
-| 1 Agent loop + tools | Nine `@tool` functions bound to a per-case context |
-| 2 Hooks | Gate-and-dose lock, the workshop rate limiter, an audit trail |
-| 3 Skills + steering | Three `SKILL.md` procedures; a `SteeringHandler` with `LedgerProvider` enforcing facility → note → check → pre-alert → arrival check; an `LLMSteeringHandler` reviewing replies for doses, reassurance and diagnosis wording |
-| 4 Session managers | `FileSessionManager` locally, `S3SessionManager` on AgentCore |
-| 5 Deploy | `BedrockAgentCoreApp` entrypoint, deployed with the `agentcore` CLI (Direct Code Deploy) |
-| 6 Multi-agent | Referral-writer specialist used as a tool |
-| 7 Evals | Offline metrics with Wilson intervals, plus `strands_evals` trajectory and output evaluators |
+| Tools | Nine `@tool` functions bound to a per-case context |
+| Hooks | Gate-and-dose lock, per-tool rate limit, audit trail |
+| Skills | `SKILL.md` procedures for referral handoff, birth preparedness and counter-referral |
+| Steering | `SteeringHandler` + `LedgerProvider` enforcing facility → note → check → pre-alert → arrival check; `LLMSteeringHandler` reviewing replies |
+| Sessions | `FileSessionManager` locally, `S3SessionManager` on AgentCore |
+| Multi-agent | Referral-writer specialist used as a tool |
+| Deployment | `BedrockAgentCoreApp` on Amazon Bedrock AgentCore Runtime |
+| Evals | Offline metrics with Wilson intervals, plus `strands_evals` trajectory and output evaluators |
 
-Beyond the workshop: a deterministic gate before any model call; code locks
-inside the tools so the order holds even if steering is bypassed; a closed
-referral loop across two facilities with Amazon Location Service, SNS and
-EventBridge Scheduler; and an external check on 452 real antenatal readings.
+Also: a deterministic gate before any model call; code locks inside the
+tools so the order holds even if steering is bypassed; a closed referral
+loop across two facilities with Amazon Location Service, SNS and EventBridge
+Scheduler; and an external check on 452 real antenatal readings.
 
 ## Evaluation
 

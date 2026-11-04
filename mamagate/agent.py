@@ -1,15 +1,15 @@
 """MamaGate agent: the harness around the code-owned gate.
 
-Built layer by layer, following the Strands workshop modules:
+Layers:
 
-* Module 1, agent loop and tools: ``@tool`` functions bound to a
+* Tools: ``@tool`` functions bound to a
   per-case :class:`~mamagate.case.CaseContext`.
-* Module 2, hooks: a gate lock, a dose lock on tool inputs, a rate
+* Hooks: a gate lock, a dose lock on tool inputs, a rate
   limiter and an audit trail.
-* Module 3, skills and steering: SKILL.md procedures, a deterministic
+* Skills and steering: SKILL.md procedures, a deterministic
   referral-workflow handler and an LLM language guardrail.
-* Module 4, sessions: file sessions locally, S3 sessions when deployed.
-* Module 6, multi-agent: a referral-writer specialist used as a tool.
+* Sessions: file sessions locally, S3 sessions when deployed.
+* Multi-agent: a referral-writer specialist used as a tool.
 
 The gate itself (:func:`mamagate.triage.triage`) runs in plain Python
 before the agent is created, so urgency never depends on a model.
@@ -117,7 +117,7 @@ class NoteNarrative(BaseModel):
 
 
 # --------------------------------------------------------------------------
-# Module 6: specialist agent used as a tool
+# specialist agent used as a tool
 # --------------------------------------------------------------------------
 def _model() -> BedrockModel:
     """Return the Bedrock model, defaulting to the Strands default."""
@@ -152,7 +152,7 @@ def write_narrative(ctx: CaseContext, guidance: str) -> NoteNarrative:
 
 
 # --------------------------------------------------------------------------
-# Module 1: tools bound to the case
+# tools bound to the case
 # --------------------------------------------------------------------------
 def make_tools(ctx: CaseContext) -> list:
     """Create the tool set for one consultation."""
@@ -285,7 +285,7 @@ def make_tools(ctx: CaseContext) -> list:
 
 
 # --------------------------------------------------------------------------
-# Module 2: hooks
+# hooks
 # --------------------------------------------------------------------------
 class GateAndDoseLockHook(HookProvider):
     """Refuse to run without a gate result, and refuse dosed tool inputs."""
@@ -312,7 +312,7 @@ class GateAndDoseLockHook(HookProvider):
 
 
 class RateLimiterHook(HookProvider):
-    """Cap each tool at ``max_calls`` per invocation (workshop Module 2)."""
+    """Cap each tool at ``max_calls`` per invocation ."""
 
     def __init__(self, max_calls: int = 3) -> None:
         """Set the per-tool limit."""
@@ -356,7 +356,7 @@ class AuditHook(HookProvider):
 
 
 # --------------------------------------------------------------------------
-# Module 3: steering
+# steering
 # --------------------------------------------------------------------------
 def _succeeded(calls: list[dict], name: str) -> bool:
     """Return True if a tool succeeded earlier in this invocation."""
@@ -436,7 +436,7 @@ class LanguageGuardrailHandler(LLMSteeringHandler):
 
 
 # --------------------------------------------------------------------------
-# Module 4: sessions
+# sessions
 # --------------------------------------------------------------------------
 def _writable_session_dir() -> str:
     """Return ./sessions if writable, else a temp directory."""

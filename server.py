@@ -57,7 +57,7 @@ app.add_middleware(
 
 
 def _invoke_runtime(payload: dict[str, Any]) -> dict[str, Any]:
-    """Call the deployed AgentCore Runtime with boto3 (workshop Part 4)."""
+    """Call the deployed AgentCore Runtime with boto3 ."""
     import boto3
 
     session_id = payload.get("session_id") or str(uuid.uuid4())

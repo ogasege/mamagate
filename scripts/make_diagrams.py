@@ -1,4 +1,4 @@
-"""Draw MamaGate's architecture diagrams in the workshop's visual style.
+"""Draw MamaGate's architecture diagrams as flowcharts.
 
 Rounded boxes (green input, teal agent, amber tool or service, red block),
 diamond decisions (blue before-tool, purple after-model) and labelled
@@ -169,7 +169,7 @@ def architecture() -> Diagram:
 
 
 def safety() -> Diagram:
-    """Steering and hooks, laid out like the workshop's steering figure."""
+    """Steering and hooks, as a decision flow."""
     d = Diagram(1700, 860, "MamaGate safety layers")
     d.box(150, 430, 220, 80, "CHEW request", "green")
     d.arrow([(260, 430), (330, 430)], "green")
@@ -246,6 +246,7 @@ def main() -> None:
         png = OUT / f"{name}.png"
         subprocess.run(
             [CHROME, "--headless=new", "--disable-gpu", "--hide-scrollbars",
+             "--force-device-scale-factor=2",
              f"--window-size={diagram.w},{diagram.h}",
              f"--screenshot={png}", f"file://{svg}"],
             check=True, capture_output=True)

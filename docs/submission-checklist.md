@@ -34,24 +34,24 @@ with the evidence in this repository and the reason behind each choice.
 
 | What | Why |
 |---|---|
-| Workshop patterns kept (tools, hooks, skills, steering, sessions, AgentCore, agents as tools, evals) | Judges and maintainers recognise them; each layer has one job. |
+| Tools, hooks, skills, steering, sessions, agents as tools, AgentCore deployment, evals | Each layer has one job, so each can be tested and reasoned about separately. |
 | Gate in plain Python before any model call | Urgency must be deterministic, testable and auditable; it runs in about 1 ms with zero tokens. |
 | Whitelisted expression interpreter for `rules.yaml` | Rules are data a clinician can review, and nothing in the file can execute code. |
 | Code locks inside the tools as well as steering | In testing, steering did not fire for one tool and an unverified pre-alert went out. Locks in the tools make the order hold regardless. |
 | LLM steering only on replies | Reviewing every tool call with a second model took 12 minutes per case; tools are governed in code instead. |
-| `S3SessionManager` on AgentCore | The runtime file system is read-only; the workshop recommends S3 for production. |
+| `S3SessionManager` on AgentCore | The runtime file system is read-only; S3 is the right store for production. |
 | 45 unit tests, ruff-clean, offline evals | Behaviour is checked without AWS, so anyone can verify it in seconds. |
 
 ### Communication quality (25%): article and video explain agent, problem and learning
 
 | What | Why |
 |---|---|
-| Three diagrams in the workshop's style (`docs/diagrams/`) | Same visual language as the workshop, so the architecture reads at a glance. |
+| Three flow diagrams (`docs/diagrams/`) | Consistent visual language, so the architecture reads at a glance. |
 | Video follows the user's journey: problem → gate → handoff → family → hospital → safety → proof → limits | One story, every rubric point, under three minutes. |
 | "What I learned" grounded in real failures | Four concrete lessons, each from something that broke and was fixed. |
 | Honest limits on every screen and in the article | Builds trust; avoids over-claiming clinical validity. |
 
-### Originality (25%): architecture, novel AWS use, beyond the workshop
+### Originality (25%): architecture, novel AWS use, how far it goes
 
 | What | Why |
 |---|---|

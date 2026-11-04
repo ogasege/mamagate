@@ -1,6 +1,6 @@
 """Amazon Bedrock AgentCore Runtime entrypoint for MamaGate.
 
-Same pattern as workshop Module 5: wrap the existing agent in
+Wraps the agent in
 ``BedrockAgentCoreApp`` with an ``@app.entrypoint`` handler. The
 payload carries the structured findings; the code gate runs first.
 

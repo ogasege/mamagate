@@ -79,36 +79,33 @@ arrived.
 
 **Why two kinds of guard:** rules that must never fail (dose refusal, tool
 order, the urgency floor) are code; judgement calls (tone, diagnosis
-wording) go to an LLM reviewer, the same split the workshop teaches with
-deterministic and LLM steering.
+wording) go to an LLM reviewer.
 
 ## Technical execution with the Strands Agents SDK
 
-I followed the workshop's seven modules and kept its patterns, then added
-the parts a clinical handoff needs.
+- **Tools.** Nine `@tool` functions bound to a per-case context: triage
+  result, facility search, facility selection, note drafting, note
+  verification, pre-alert, arrival check, urgency raise, arrival record.
+- **Hooks.** A `BeforeToolCallEvent` lock refuses any tool without a gate
+  result and rejects dosed tool inputs; a per-tool rate limit stops runaway
+  loops; an `AfterToolCallEvent` audit hook records every step for the trace
+  view.
+- **Skills.** The referral, birth-preparedness and counter-referral
+  procedures are `SKILL.md` files loaded on demand with `AgentSkills`.
+- **Steering.** A `SteeringHandler` with `LedgerProvider` enforces the order
+  facility → note → verify → pre-alert → arrival check; an
+  `LLMSteeringHandler` reviews replies for doses, reassurance and diagnosis
+  wording.
+- **Multi-agent.** A referral-writer specialist is called as a tool and
+  returns typed fields through `structured_output_model`.
+- **Sessions.** `FileSessionManager` locally, `S3SessionManager` on
+  AgentCore.
+- **Deployment.** `BedrockAgentCoreApp` entrypoint, deployed to Amazon Bedrock
+  AgentCore Runtime with the `agentcore` CLI, traced in CloudWatch.
+- **Evaluation.** `strands_evals` trajectory and output evaluators, plus an
+  offline harness with Wilson confidence intervals.
 
-- **Agent loop and tools (Module 1).** Nine `@tool` functions bound to a
-  per-case context. The docstrings are the model's manual.
-- **Hooks (Module 2).** A `BeforeToolCallEvent` lock refuses to run any tool
-  without a gate result and rejects dosed tool inputs. The workshop's rate
-  limiter caps each tool at three calls. An `AfterToolCallEvent` audit hook
-  records every step for the trace view.
-- **Skills and steering (Module 3).** The referral procedure is a
-  `SKILL.md`. A `SteeringHandler` with `LedgerProvider` enforces the order
-  facility → note → verify → pre-alert → arrival check, exactly like the
-  workshop's refund workflow. An `LLMSteeringHandler` reviews replies for
-  doses, reassurance and diagnosis wording.
-- **Sessions (Module 4).** `FileSessionManager` locally and
-  `S3SessionManager` on AgentCore.
-- **Deploy (Module 5).** `BedrockAgentCoreApp` with an `@app.entrypoint`,
-  deployed with the `agentcore` CLI using Direct Code Deploy, traced in
-  CloudWatch.
-- **Multi-agent (Module 6).** A referral-writer specialist is called as a
-  tool and returns typed fields through `structured_output_model`.
-- **Evals (Module 7).** `strands_evals` trajectory and output evaluators,
-  plus an offline harness with confidence intervals.
-
-## Originality: what goes beyond the workshop
+## What makes it different
 
 - **Code decides what must never be wrong.** Urgency comes from a
   whitelisted expression interpreter over a YAML rules file, not from a
